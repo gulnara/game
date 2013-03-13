@@ -79,8 +79,6 @@ class Horns(GameElement):
 				self.board.del_el(self.x, self.y)
 				self.x += self.velocity_x
 				self.board.set_el(self.x, self.y, self)
-
-
 				
 class Girl(GameElement):
 	IMAGE = "Girl"	
@@ -106,7 +104,7 @@ class Girl(GameElement):
 			elif self.y == 0:
 				self.velocity_y = 1
 				self.board.del_el(self.x, self.y)
-				self.y += self.velocity_y
+				self.x += self.velocity_y
 				self.board.set_el(self.x, self.y, self)
 
 class TallTrees(GameElement):
@@ -133,10 +131,6 @@ class Character(GameElement):
 		elif direction == "RIGHT":
 			return (self.x+1, self.y)
 		return None
-
-	def  interact(self, player):
-		PLAYER.inventory.append(self)
-		GAME_BOARD.draw_msg("You've been eaten! Ha Ha Ha!")
 		
 ####   End class definitions    ####
 
@@ -229,6 +223,32 @@ def initialize():
    	heart = Heart()
    	GAME_BOARD.register(heart)
    	GAME_BOARD.set_el(3,1, heart)
+
+   	
+# '''
+#    	horns_positions = [
+#     (1,3),
+#     (2,3),
+#     (3,3),
+#     (4,3),
+#     (5,3),
+#     (6,3),
+#     (7,3),
+#     (8,3)
+#     ]
+    
+#     evil_girl = []
+
+#     for pos in horns_positions:
+#     	horns_girl = Horns()
+#     	GAME_BOARD.register(horns_girl)
+#     	GAME_BOARD.set_el(pos[0], pos[1], horns_girl)
+#     	evil_girl.append(horns_girl)
+
+#     # while True:
+#     # 	for horns_girl in evil_girl:
+#     # 		print horns_girl
+# '''
 
 	horns_girl = Horns()
     GAME_BOARD.register(horns_girl)
