@@ -7,6 +7,7 @@ class GameElement(object):
         self.board = None
         self.x = None
         self.y = None
+        
 
     def interact(self, player):
         pass
