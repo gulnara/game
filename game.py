@@ -13,11 +13,36 @@ PLAYER = None
 
 GAME_WIDTH = 10
 GAME_HEIGHT = 10
+GAME_OVER = False
+
 
 #### Put class definitions here ####
 class Rock(GameElement):
 	IMAGE = "Rock"
 	SOLID = True
+
+	def  interact(self, player):
+		
+		del_x = player.x - self.x
+		del_y = player.y - self.y
+		next_x = self.x - del_x
+		next_y = self.y - del_y
+
+		existing_el = GAME_BOARD.get_el(next_x, next_y)
+
+		if next_x > GAME_WIDTH - 1 or next_x < 1:
+			return
+
+		if next_y > GAME_HEIGHT - 1 or next_y < 1:
+			return
+
+		if existing_el:
+			existing_el.interact(PLAYER)
+
+		if existing_el is None or not existing_el.SOLID:
+			GAME_BOARD.del_el(self.x, self.y)
+			GAME_BOARD.set_el(next_x, next_y, self)
+		
 
 class Key(GameElement):
 	IMAGE = "Key"
@@ -66,20 +91,23 @@ class Horns(GameElement):
 		self.last_move += dt
 		if self.last_move > 0.30:
 			#self.last_move = 0
-			self.board.del_el(self.x, self.y)
-			self.x += self.velocity_x
-			self.board.set_el(self.x, self.y, self)
+			# self.board.del_el(self.x, self.y)
+			# self.x += self.velocity_x
+			# self.board.set_el(self.x, self.y, self)
+			
 			if self.x == 9:
 				self.velocity_x = -1
-				self.board.del_el(self.x, self.y)
-				self.x += self.velocity_x
-				self.board.set_el(self.x, self.y, self)
 			elif self.x == 0:
 				self.velocity_x = 1
-				self.board.del_el(self.x, self.y)
-				self.x += self.velocity_x
-				self.board.set_el(self.x, self.y, self)
 
+			self.board.del_el(self.x, self.y)
+			self.x += self.velocity_x
+			target_el = GAME_BOARD.get_el(self.x, self.y)
+			if target_el == PLAYER:
+				global GAME_OVER
+				GAME_OVER = True
+				GAME_BOARD.draw_msg("You've been eaten! Ha Ha Ha!")
+			self.board.set_el(self.x, self.y, self)
 
 				
 class Girl(GameElement):
@@ -94,20 +122,21 @@ class Girl(GameElement):
 	def update(self, dt):
 		self.last_move += dt
 		if self.last_move > 0.30:
-			#self.last_move = 0
-			self.board.del_el(self.x, self.y)
-			self.y += self.velocity_y
-			self.board.set_el(self.x, self.y, self)
+		
 			if self.y == 9:
 				self.velocity_y = -1
-				self.board.del_el(self.x, self.y)
-				self.y += self.velocity_y
-				self.board.set_el(self.x, self.y, self)
 			elif self.y == 0:
 				self.velocity_y = 1
-				self.board.del_el(self.x, self.y)
-				self.y += self.velocity_y
-				self.board.set_el(self.x, self.y, self)
+
+			self.board.del_el(self.x, self.y)
+			self.y += self.velocity_y
+			target_el = GAME_BOARD.get_el(self.x, self.y)
+			if target_el == PLAYER:
+				global GAME_OVER
+				GAME_OVER = True
+				GAME_BOARD.draw_msg("You've been eaten! Ha Ha Ha!")
+
+			self.board.set_el(self.x, self.y, self)	
 
 class TallTrees(GameElement):
 	IMAGE = "TallTree"
@@ -115,6 +144,10 @@ class TallTrees(GameElement):
 
 class ShortTrees(GameElement):
 	IMAGE = "ShortTree"
+
+	def  interact(self, player):
+		PLAYER.inventory.append(self)
+		GAME_BOARD.draw_msg("Good Job on Chopping that tree!")
 
 class Character(GameElement):
 	IMAGE = "Boy"
@@ -149,7 +182,7 @@ def initialize():
     (4,5),
     (2,4),
     (7,4),
-    (8,4),
+    (8,3),
     (4,2),
     (2,1)
     ]
@@ -208,7 +241,7 @@ def initialize():
    	GAME_BOARD.set_el(1,8, PLAYER)
    	print PLAYER
 
-   	GAME_BOARD.draw_msg("Collect the key to conquer the heart of the Princess! Watch out for the Girl with Horns!")
+   	GAME_BOARD.draw_msg("Collect the key to conquer the heart of the Princess! Watch out for the Girl Guards!")
 
    	key = Key()
    	GAME_BOARD.register(key)
@@ -239,6 +272,9 @@ def initialize():
     GAME_BOARD.set_el(6, 1, pink_girl)
 
 def keyboard_handler():
+	if GAME_OVER == True:
+		return 
+
 	direction = None
 
 	if KEYBOARD[key.UP]:
@@ -250,10 +286,18 @@ def keyboard_handler():
 	elif KEYBOARD[key.RIGHT]:
 		direction = "RIGHT"
 
+
 	if direction:
+
 		next_location = PLAYER.next_pos(direction)
 		next_x = next_location[0]
 		next_y = next_location[1]
+
+		if next_x > GAME_WIDTH - 2 or next_x < 1:
+			return
+
+		if next_y > GAME_HEIGHT - 2 or next_y < 1:
+			return
 
 		existing_el = GAME_BOARD.get_el(next_x, next_y)
 
@@ -263,5 +307,7 @@ def keyboard_handler():
 		if existing_el is None or not existing_el.SOLID:
 			GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
 			GAME_BOARD.set_el(next_x, next_y, PLAYER)
+
+		
 
 
